@@ -1,6 +1,6 @@
 <?php
 /**
- * Fuel is a fast, lightweight, community driven PHP5 framework.
+ * LdapAuth is Ldap authentication package for FuelPHP.
  *
  * @package    LdapAuth
  * @version    1.0

@@ -1,6 +1,6 @@
 <?php
 /**
- * Fuel is a fast, lightweight, community driven PHP5 framework.
+ * LdapAuth is Ldap authentication package for FuelPHP.
  *
  * @package    LdapAuth
  * @version    1.0
@@ -18,7 +18,7 @@ class LdapUserUpdateException extends \FuelException {}
 class LdapUserWrongPassword extends \FuelException {}
 
 /**
- * SimpleAuth basic login driver
+ * LdapAuth basic login driver
  *
  * @package     Fuel
  * @subpackage  Auth
@@ -53,10 +53,10 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	);
 
 	/**
-	 * @var  array  SimpleAuth class config
+	 * @var  array  LdapAuth class config
 	 */
 	protected $config = array(
-		'drivers' => array('group' => array('SimpleGroup')),
+		'drivers' => array('group' => array('LdapGroup')),
 		'additional_fields' => array('profile_fields'),
 	);
 
@@ -309,7 +309,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			return false;
 		}
 
-//		$this->user = \DB::select_array(\Config::get('simpleauth.table_columns', array('*')))
+//		$this->user = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
 
 //		if ($this->user == false)
 //		{
@@ -355,24 +355,24 @@ return false;
 
 		if (empty($username) or empty($password) or empty($email))
 		{
-//			throw new \SimpleUserUpdateException('Username, password and email address can\'t be empty.', 1);
+//			throw new \LdapUserUpdateException('Username, password and email address can\'t be empty.', 1);
 		}
 
-		$same_users = \DB::select_array(\Config::get('simpleauth.table_columns', array('*')))
+		$same_users = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
 			->where('username', '=', $username)
 			->or_where('email', '=', $email)
-			->from(\Config::get('simpleauth.table_name'))
-			->execute(\Config::get('simpleauth.db_connection'));
+			->from(\Config::get('ldapauth.table_name'))
+			->execute(\Config::get('ldapauth.db_connection'));
 
 		if ($same_users->count() > 0)
 		{
 			if (in_array(strtolower($email), array_map('strtolower', $same_users->current())))
 			{
-//				throw new \SimpleUserUpdateException('Email address already exists', 2);
+//				throw new \LdapUserUpdateException('Email address already exists', 2);
 			}
 			else
 			{
-//				throw new \SimpleUserUpdateException('Username already exists', 3);
+//				throw new \LdapUserUpdateException('Username already exists', 3);
 			}
 		}
 
@@ -384,9 +384,9 @@ return false;
 			'profile_fields'  => serialize($profile_fields),
 			'created_at'      => \Date::forge()->get_timestamp()
 		);
-		$result = \DB::insert(\Config::get('simpleauth.table_name'))
+		$result = \DB::insert(\Config::get('ldapauth.table_name'))
 			->set($user)
-			->execute(\Config::get('simpleauth.db_connection'));
+			->execute(\Config::get('ldapauth.db_connection'));
 
 		return ($result[1] > 0) ? $result[0] : false;
 	}
@@ -403,33 +403,33 @@ return false;
 	{
 return false;
 		$username = $username ?: $this->user['username'];
-		$current_values = \DB::select_array(\Config::get('simpleauth.table_columns', array('*')))
+		$current_values = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
 			->where('username', '=', $username)
-			->from(\Config::get('simpleauth.table_name'))
-			->execute(\Config::get('simpleauth.db_connection'));
+			->from(\Config::get('ldapauth.table_name'))
+			->execute(\Config::get('ldapauth.db_connection'));
 
 		if (empty($current_values))
 		{
-//			throw new \SimpleUserUpdateException('Username not found', 4);
+//			throw new \LdapUserUpdateException('Username not found', 4);
 		}
 
 		$update = array();
 		if (array_key_exists('username', $values))
 		{
-//			throw new \SimpleUserUpdateException('Username cannot be changed.', 5);
+//			throw new \LdapUserUpdateException('Username cannot be changed.', 5);
 		}
 		if (array_key_exists('password', $values))
 		{
 			if (empty($values['old_password'])
 				or $current_values->get('password') != $this->hash_password(trim($values['old_password'])))
 			{
-//				throw new \SimpleUserWrongPassword('Old password is invalid');
+//				throw new \LdapUserWrongPassword('Old password is invalid');
 			}
 
 			$password = trim(strval($values['password']));
 			if ($password === '')
 			{
-//				throw new \SimpleUserUpdateException('Password can\'t be empty.', 6);
+//				throw new \LdapUserUpdateException('Password can\'t be empty.', 6);
 			}
 			$update['password'] = $this->hash_password($password);
 			unset($values['password']);
@@ -443,7 +443,7 @@ return false;
 			$email = filter_var(trim($values['email']), FILTER_VALIDATE_EMAIL);
 			if ( ! $email)
 			{
-//				throw new \SimpleUserUpdateException('Email address is not valid', 7);
+//				throw new \LdapUserUpdateException('Email address is not valid', 7);
 			}
 			$update['email'] = $email;
 			unset($values['email']);
@@ -473,18 +473,18 @@ return false;
 			$update['profile_fields'] = serialize($profile_fields);
 		}
 
-		$affected_rows = \DB::update(\Config::get('simpleauth.table_name'))
+		$affected_rows = \DB::update(\Config::get('ldapauth.table_name'))
 			->set($update)
 			->where('username', '=', $username)
-			->execute(\Config::get('simpleauth.db_connection'));
+			->execute(\Config::get('ldapauth.db_connection'));
 
 		// Refresh user
 		if ($this->user['username'] == $username)
 		{
-			$this->user = \DB::select_array(\Config::get('simpleauth.table_columns', array('*')))
+			$this->user = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
 				->where('username', '=', $username)
-				->from(\Config::get('simpleauth.table_name'))
-				->execute(\Config::get('simpleauth.db_connection'))->current();
+				->from(\Config::get('ldapauth.table_name'))
+				->execute(\Config::get('ldapauth.db_connection'))->current();
 		}
 
 		return $affected_rows > 0;
@@ -506,7 +506,7 @@ return false;
 			return (bool) $this->update_user(array('old_password' => $old_password, 'password' => $new_password), $username);
 		}
 		// Only catch the wrong password exception
-		catch (SimpleUserWrongPassword $e)
+		catch (LdapUserWrongPassword $e)
 		{
 			return false;
 		}
@@ -525,14 +525,14 @@ return false;
 		$new_password = \Str::random('alnum', 8);
 		$password_hash = $this->hash_password($new_password);
 
-		$affected_rows = \DB::update(\Config::get('simpleauth.table_name'))
+		$affected_rows = \DB::update(\Config::get('ldapauth.table_name'))
 			->set(array('password' => $password_hash))
 			->where('username', '=', $username)
-			->execute(\Config::get('simpleauth.db_connection'));
+			->execute(\Config::get('ldapauth.db_connection'));
 
 		if ( ! $affected_rows)
 		{
-			throw new \SimpleUserUpdateException('Failed to reset password, user was invalid.', 8);
+			throw new \LdapUserUpdateException('Failed to reset password, user was invalid.', 8);
 		}
 
 		return $new_password;
@@ -549,12 +549,12 @@ return false;
 return false;
 		if (empty($username))
 		{
-			throw new \SimpleUserUpdateException('Cannot delete user with empty username', 9);
+			throw new \LdapUserUpdateException('Cannot delete user with empty username', 9);
 		}
 
-		$affected_rows = \DB::delete(\Config::get('simpleauth.table_name'))
+		$affected_rows = \DB::delete(\Config::get('ldapauth.table_name'))
 			->where('username', '=', $username)
-			->execute(\Config::get('simpleauth.db_connection'));
+			->execute(\Config::get('ldapauth.db_connection'));
 
 		return $affected_rows > 0;
 	}
@@ -573,7 +573,7 @@ return false;
 		
 		if (empty($this->user))
 		{
-//			throw new \SimpleUserUpdateException('User not logged in, can\'t create login hash.', 10);
+//			throw new \LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
 		}
 
 		$login_hash = self::$driver->create($this->user['id']);
@@ -610,7 +610,7 @@ return false;
 			return false;
 		}
 
-		return array(array('SimpleGroup', $this->user['group']));
+		return array(array('LdapGroup', $this->user['group']));
 	}
 
 	/**
@@ -689,4 +689,4 @@ return false;
 	}
 }
 
-// end of file simpleauth.php
+// end of file ldapauth.php

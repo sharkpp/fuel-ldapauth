@@ -1,6 +1,6 @@
 <?php
 /**
- * Fuel is a fast, lightweight, community driven PHP5 framework.
+ * LdapAuth is Ldap authentication package for FuelPHP.
  *
  * @package    LdapAuth
  * @version    1.0
@@ -12,15 +12,10 @@
 
 namespace Ldap;
 
-
-//class SimpleUserUpdateException extends \FuelException {}
-
-//class SimpleUserWrongPassword extends \FuelException {}
-
 /**
- * SimpleAuth basic login driver
+ * LdapAuth database state holder driver
  *
- * @package     Fuel
+ * @package     LdapAuth
  * @subpackage  Auth
  */
 class Stateholder_Db extends Stateholder_Driver
@@ -113,4 +108,4 @@ $r=
 	}
 }
 
-// end of file simpleauth.php
+// end of file ldapauth.php
