@@ -10,7 +10,7 @@
  * @link       https://www.sharkpp.net/
  */
 
-namespace Ldap;
+namespace LdapAuth;
 
 /**
  * LdapAuth state holder driver

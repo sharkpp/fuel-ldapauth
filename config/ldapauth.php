@@ -23,7 +23,7 @@ return array(
 	'host'              => 'localhost',
 	'port'              => 389,
 	'secure'            => false,
-	'username'          => 'admin@example.net',
+	'username'          => 'admin@example.net', // admin@example.net or home.example.net\\admin
 	'password'          => 'password',
 	'basedn'            => 'CN=Users,DC=home,DC=example,DC=net',
 	'account'           => 'sAMAccountName',
@@ -42,4 +42,43 @@ return array(
 			'username_field'   => 'username',
 			'db_connection'     => null,
 		),
+	/**
+	 * Groups as id => array(name => <string>, roles => <array>)
+	 */
+	'groups' => array(
+		/**
+		 * Examples
+		 * ---
+		 *
+		 * -1   => array('name' => 'Banned', 'roles' => array('banned')),
+		 * 0    => array('name' => 'Guests', 'roles' => array()),
+		 * 1    => array('name' => 'Users', 'roles' => array('user')),
+		 * 50   => array('name' => 'Moderators', 'roles' => array('user', 'moderator')),
+		 * 100  => array('name' => 'Administrators', 'roles' => array('user', 'moderator', 'admin')),
+		 */
+	),
+
+	/**
+	 * Roles as name => array(location => rights)
+	 */
+	'roles' => array(
+		/**
+		 * Examples
+		 * ---
+		 *
+		 * Regular example with role "user" given create & read rights on "comments":
+		 *   'user'  => array('comments' => array('create', 'read')),
+		 * And similar additional rights for moderators:
+		 *   'moderator'  => array('comments' => array('update', 'delete')),
+		 *
+		 * Wildcard # role (auto assigned to all groups):
+		 *   '#'  => array('website' => array('read'))
+		 *
+		 * Global disallow by assigning false to a role:
+		 *   'banned' => false,
+		 *
+		 * Global allow by assigning true to a role (use with care!):
+		 *   'super' => true,
+		 */
+	),
 );

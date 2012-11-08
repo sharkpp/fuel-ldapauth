@@ -10,7 +10,7 @@
  * @link       https://www.sharkpp.net/
  */
 
-namespace Ldap;
+namespace LdapAuth;
 
 
 class LdapUserUpdateException extends \FuelException {}
@@ -45,11 +45,11 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	 * @var  array  value for guest login
 	 */
 	protected static $guest_login = array(
-		'id' => '',
-		'username' => 'guest',
-		'group' => '0',
+		'id'         => '',
+		'username'   => 'guest',
+		'group'      => '0',
 		'login_hash' => false,
-		'email' => false
+		'email'      => false
 	);
 
 	/**
@@ -165,6 +165,9 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 	function __construct()
 	{
+		//
+	//	$this->config['drivers'] = self::g('drivers', $this->config['drivers']);
+
 		// ldapサーバーと接続
 		$uri = sprintf('%s://%s:%d/'
 							, self::g('secure', false) ? 'ldaps' : 'ldap'
@@ -355,7 +358,7 @@ return false;
 
 		if (empty($username) or empty($password) or empty($email))
 		{
-//			throw new \LdapUserUpdateException('Username, password and email address can\'t be empty.', 1);
+			throw new \LdapUserUpdateException('Username, password and email address can\'t be empty.', 1);
 		}
 
 		$same_users = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
@@ -368,11 +371,11 @@ return false;
 		{
 			if (in_array(strtolower($email), array_map('strtolower', $same_users->current())))
 			{
-//				throw new \LdapUserUpdateException('Email address already exists', 2);
+				throw new \LdapUserUpdateException('Email address already exists', 2);
 			}
 			else
 			{
-//				throw new \LdapUserUpdateException('Username already exists', 3);
+				throw new \LdapUserUpdateException('Username already exists', 3);
 			}
 		}
 
@@ -410,26 +413,26 @@ return false;
 
 		if (empty($current_values))
 		{
-//			throw new \LdapUserUpdateException('Username not found', 4);
+			throw new \LdapUserUpdateException('Username not found', 4);
 		}
 
 		$update = array();
 		if (array_key_exists('username', $values))
 		{
-//			throw new \LdapUserUpdateException('Username cannot be changed.', 5);
+			throw new \LdapUserUpdateException('Username cannot be changed.', 5);
 		}
 		if (array_key_exists('password', $values))
 		{
 			if (empty($values['old_password'])
 				or $current_values->get('password') != $this->hash_password(trim($values['old_password'])))
 			{
-//				throw new \LdapUserWrongPassword('Old password is invalid');
+				throw new \LdapUserWrongPassword('Old password is invalid');
 			}
 
 			$password = trim(strval($values['password']));
 			if ($password === '')
 			{
-//				throw new \LdapUserUpdateException('Password can\'t be empty.', 6);
+				throw new \LdapUserUpdateException('Password can\'t be empty.', 6);
 			}
 			$update['password'] = $this->hash_password($password);
 			unset($values['password']);
@@ -443,7 +446,7 @@ return false;
 			$email = filter_var(trim($values['email']), FILTER_VALIDATE_EMAIL);
 			if ( ! $email)
 			{
-//				throw new \LdapUserUpdateException('Email address is not valid', 7);
+				throw new \LdapUserUpdateException('Email address is not valid', 7);
 			}
 			$update['email'] = $email;
 			unset($values['email']);
@@ -573,7 +576,7 @@ return false;
 		
 		if (empty($this->user))
 		{
-//			throw new \LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
+			throw new \LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
 		}
 
 		$login_hash = self::$driver->create($this->user['id']);
