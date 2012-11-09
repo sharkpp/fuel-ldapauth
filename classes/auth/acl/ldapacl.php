@@ -30,8 +30,9 @@ class Auth_Acl_LdapAcl extends \Auth\Auth_Acl_SimpleAcl
 
 	public static function _init()
 	{
-		static::$_valid_roles = array_keys(\Config::get('ldapauth.roles', array()));
+		\Config::load('simpleauth', true, false, true);
+		static::$_valid_roles = array_keys(\Config::get('simpleauth.roles', array()));
 	}
 }
 
-/* end of file simpleacl.php */
+/* end of file ldapacl.php */

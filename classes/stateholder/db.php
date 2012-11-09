@@ -32,23 +32,35 @@ class Stateholder_Db extends Stateholder_Driver
 
 	// ハッシュ作成
 	// ユーザー名
-	public function create($user) 
+	public function create($user, $create_when_not_found = false)
 	{
 		$last_login = \Date::forge()->get_timestamp();
 		$login_hash = sha1(self::g('login_hash_salt').$user.$last_login);
 \Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.'$last_login='.$last_login.',$login_hash='.$login_hash);
 
-$r=
-		\DB::update(self::g('table_name'))
-			->set(array(
-		    		self::g('login_hash_field', 'login_hash') => $login_hash,
-			    	self::g('last_login_field', 'last_login') => $last_login,
-				))
-			->where(self::g('username_field', 'username'), '=', $user)
-			->execute(self::g('db_connection'));
+		$r = \DB::update(self::g('table_name'))
+				->set(array(
+			    		self::g('login_hash_field', 'login_hash') => $login_hash,
+				    	self::g('last_login_field', 'last_login') => $last_login,
+					))
+				->where(self::g('username_field', 'username'), '=', $user)
+				->execute(self::g('db_connection'));
 \Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
 
-		return $login_hash;
+		if (!$r &&
+			$create_when_not_found) {
+			$r = \DB::insert(self::g('table_name'))
+					->set(array(
+				    		self::g('username_field',   'username')   => $user,
+				    		self::g('group_field',      'group')      => 1,
+				    		self::g('login_hash_field', 'login_hash') => $login_hash,
+					    	self::g('last_login_field', 'last_login') => $last_login,
+						))
+					->execute(self::g('db_connection'));
+\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
+		}
+
+		return $r ? $login_hash : false;
 	}
 
 	// ハッシュ取得

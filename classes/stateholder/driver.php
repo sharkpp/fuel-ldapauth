@@ -23,11 +23,11 @@ abstract class Stateholder_Driver
 
 	// ハッシュ作成
 	// ユーザー名
-	abstract function create($user) ;
+	abstract function create($user, $create_when_not_found = false);
 
 	// ハッシュ取得
 	// ユーザー名
-	abstract function search($user) ;
+	abstract function search($user);
 
 	//ハッシュ検証
 	// ユーザー名、ハッシュ

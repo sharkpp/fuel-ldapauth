@@ -71,7 +71,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	{
 		return \Config::get('ldapauth.'.$key, $default);
 	}
-	
+
 	private function get_user_dn($username)
 	{
 		if( !$this->ldap['conn'] )
@@ -106,6 +106,8 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			\Log::debug('search error in "'.self::g('username', '').'": "'.ldap_error($this->ldap['conn']).'"');
 			return false;
 		}
+\Log::info('query = "'.$query.'"');
+\Log::info('filter = '.print_r($filter,true).'');
 
 		$ent = ldap_get_entries($this->ldap['conn'], $sr);
 		if( false === $ent ||
@@ -114,33 +116,44 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			\Log::debug('get entries error in "'.self::g('username', '').'": "'.ldap_error($this->ldap['conn']).'" "'.$query.'"');
 			return false;
 		}
-		
+
 	/*	if( !@ldap_unbind($this->ldap['conn']) )
 		{
 			\Log::debug('unbind error in "'.self::g('username', '').'": "'.ldap_error($this->ldap['conn']).'"');
 		}*/
-		
+
 		$userdn = $ent[0]['dn'];
-	\Log::info('user dn = "'.$userdn.'"');
-		
-		$email_field = self::g('email');
+\Log::info('user dn = "'.$userdn.'"');
+\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($ent,true));
+
+		$email_field     = self::g('email');
 		$firstname_field = self::g('firstname');
-		$lastname_field = self::g('lastname');
+		$lastname_field  = self::g('lastname');
+		$firstname       = $firstname_field &&
+		                   isset($ent[0][$firstname_field][0]) ? $ent[0][$firstname_field][0]
+		                                                       : isset($ent[0][strtolower($firstname_field)][0]) ? $ent[0][strtolower($firstname_field)][0]
+		                                                                                                         : '';
+		$lastname        = $lastname_field &&
+		                   isset($ent[0][$lastname_field][0]) ? $ent[0][$lastname_field][0]
+		                                                      : isset($ent[0][strtolower($lastname_field)][0]) ? $ent[0][strtolower($lastname_field)][0]
+		                                                                                                       : '';
+		$email           = $email_field &&
+		                   isset($ent[0][$email_field][0]) ? $ent[0][$email_field][0]
+		                                                   : isset($ent[0][strtolower($email_field)][0]) ? $ent[0][strtolower($email_field)][0]
+		                                                                                                 : false;
 
 		$this->ldap['user'] =
 			array(
 					'id' => $username,
-					'username' => 
-						($firstname_field && isset($ent[0][$firstname_field]) ? $ent[0][$firstname_field] : '') . ' ' .
-						($lastname_field && isset($ent[0][$lastname_field]) ? $ent[0][$lastname_field] : ''),
-					'group' => '0',
+					'username'   => $firstname . ' ' . $lastname,
+					'group'      => '1',
 					'login_hash' => false,
-					'email' => $email_field && isset($ent[0][$email_field]) ? $ent[0][$email_field] : false
+					'email'      => $email,
 				);
 
 		return $userdn;
 	}
-	
+
 	private function auth_user($userdn, $password)
 	{
 		if( !$this->ldap['conn'] )
@@ -154,12 +167,12 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			\Log::debug('bind error in "'.$userdn.'": "'.ldap_error($this->ldap['conn']).'"');
 			return false;
 		}
-		
+
 		if( !@ldap_unbind($this->ldap['conn']) )
 		{
 			\Log::debug('unbind error in "'.$userdn.'": "'.ldap_error($this->ldap['conn']).'"');
 		}
-		
+
 		return true;
 	}
 
@@ -188,7 +201,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		    ldap_set_option($this->ldap['conn'], LDAP_OPT_REFERRALS, 0);	
 		}
 	}
-	
+
 	function __destruct()
 	{
 	\Log::info('call __destruct '.print_r($this->ldap['conn'], true));
@@ -257,8 +270,9 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		{
 			return false;
 		}
-		
+
 		$this->user = $this->ldap['user'];
+\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($this->ldap,true));
 
 		return $this->user ?: false;
 	}
@@ -272,17 +286,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	 */
 	public function login($username_or_email = '', $password = '')
 	{
-		if ( empty($username_or_email) || empty($password) )
-		{
-			return false;
-		}
-
-		if( false === ($userdn = $this->get_user_dn($username_or_email)) )
-		{
-			return false;
-		}
-
-		if( !$this->auth_user($userdn, $password) )
+		if ( false === $this->validate_user($username_or_email, $password) )
 		{
 			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
 			\Session::delete('username');
@@ -290,8 +294,6 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			return false;
 		}
 
-		$this->user = $this->ldap['user'];
-		
 		\Session::set('username', $this->user['id']);
 		\Session::set('login_hash', $this->create_login_hash());
 		\Session::instance()->rotate();
@@ -321,7 +323,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 //			\Session::delete('login_hash');
 //	/		return false;
 //		}
-		
+
 		\Session::set('username', $this->user['username']);
 		\Session::set('login_hash', $this->create_login_hash());
 		return true;
@@ -573,13 +575,13 @@ return false;
 		{
 			return false;
 		}
-		
+
 		if (empty($this->user))
 		{
 			throw new \LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
 		}
 
-		$login_hash = self::$driver->create($this->user['id']);
+		$login_hash = self::$driver->create($this->user['id'], self::g('create_when_not_found', false));
 
 		$this->user['login_hash'] = $login_hash;
 
@@ -598,7 +600,7 @@ return false;
 			return false;
 		}
 
-		return array($this->id, (int) $this->user['id']);
+		return array($this->id, $this->user['id']);
 	}
 
 	/**
@@ -677,7 +679,7 @@ return false;
 	{
 		if (is_null($user))
 		{
-			$groups = self::get_groups();
+			$groups = $this->get_groups();
 			$user = reset($groups);
 		}
 		return parent::has_access($condition, $driver, $user);
