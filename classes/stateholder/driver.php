@@ -23,19 +23,23 @@ abstract class Stateholder_Driver
 
 	// ハッシュ作成
 	// ユーザー名
-	abstract function create($user, $create_when_not_found = false);
+	abstract function create_hash($user, $create_when_not_found = false);
 
-	// ハッシュ取得
+	// ユーザー情報取得
 	// ユーザー名
 	abstract function search($user);
 
+	// ユーザー情報更新
+	// ユーザー名
+	abstract function update($user_info);
+
 	//ハッシュ検証
 	// ユーザー名、ハッシュ
-	abstract function validate($user, $hash);
+	abstract function validate_hash($user, $hash);
 	
 	//ハッシュクリア
 	// ユーザー名、ハッシュ
-	abstract function clear($user, $hash);
+	abstract function clear_hash($user, $hash);
 }
 
 // end of file simpleauth.php

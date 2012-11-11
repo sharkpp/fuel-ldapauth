@@ -32,7 +32,7 @@ class Stateholder_Db extends Stateholder_Driver
 
 	// ハッシュ作成
 	// ユーザー名
-	public function create($user, $create_when_not_found = false)
+	public function create_hash($user, $create_when_not_found = false)
 	{
 		$last_login = \Date::forge()->get_timestamp();
 		$login_hash = sha1(self::g('login_hash_salt').$user.$last_login);
@@ -63,7 +63,7 @@ class Stateholder_Db extends Stateholder_Driver
 		return $r ? $login_hash : false;
 	}
 
-	// ハッシュ取得
+	// ユーザー情報取得
 	// ユーザー名
 	public function search($user)
 	{
@@ -72,12 +72,40 @@ class Stateholder_Db extends Stateholder_Driver
 				->where(self::g('username_field', 'username'), $user)
 				->execute(self::g('db_connection'));
 \Log::debug(print_r($result,true));
-		return !empty($result) ? $result[0][self::g('login_hash_field', 'login_hash')] : false;
+		return empty($result)
+				? false
+				: array(
+						'id'         => $user,
+						'username'   => $result[0][self::g('username_field',   'username')],
+						'group'      => $result[0][self::g('group_field',      'group')],
+						'email'      => $result[0][self::g('email_field',      'email')],
+						'last_login' => $result[0][self::g('last_login_field', 'last_login')],
+						'login_hash' => $result[0][self::g('login_hash_field', 'login_hash')],
+					);
+	}
+
+	// ユーザー情報更新
+	// ユーザー名
+	public function update($user_info)
+	{
+$r=
+		\DB::update(self::g('table_name'))
+			->set(array(
+		    		self::g('username_field',   'username')   => $user_info['id'],
+		    		self::g('group_field',      'group')      => $user_info['group'],
+		    		self::g('email_field',      'email')      => $user_info['email'],
+		    		self::g('login_hash_field', 'login_hash') => $user_info['login_hash'],
+				))
+			->where_open()
+				->where(self::g('username_field', 'username'), $user_info['id'])
+				->where_close()
+			->execute(self::g('db_connection'));
+\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
 	}
 
 	//ハッシュ検証
 	// ユーザー名、ハッシュ
-	public function validate($user, $hash)
+	public function validate_hash($user, $hash)
 	{
 \Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$hash='.$hash);
 		$result = \DB::select()
@@ -91,10 +119,10 @@ class Stateholder_Db extends Stateholder_Driver
 
 		return !empty($result);
 	}
-	
+
 	//ハッシュクリア
 	// ユーザー名、ハッシュ
-	public function clear($user, $hash)
+	public function clear_hash($user, $hash)
 	{
 \Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$hash='.$hash);
 //		$result = \DB::delete(g('table_name'))
@@ -105,13 +133,13 @@ class Stateholder_Db extends Stateholder_Driver
 //			->execute();
 
 $r=
-		\DB::update(g('table_name'))
+		\DB::update(self::g('table_name'))
 			->set(array(
 		    		self::g('login_hash_field', 'login_hash') => "",
 				))
 			->where_open()
 				->where(self::g('username_field', 'username'), $user)
-				->where_and(self::g('last_login_field', 'last_login'), $hash)
+			//	->where_and(self::g('last_login_field', 'last_login'), $hash)
 				->where_close()
 			->execute(self::g('db_connection'));
 \Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));

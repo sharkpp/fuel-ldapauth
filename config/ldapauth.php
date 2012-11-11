@@ -44,5 +44,4 @@ return array(
 			'group_field'      => 'group',
 			'db_connection'    => null,
 		),
-	),
 );

@@ -220,15 +220,10 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		// only worth checking if there's both a username and login-hash
 		if ( ! empty($username) and ! empty($login_hash))
 		{
+\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($this->user,true));
 			if (is_null($this->user) or ($this->user['id'] != $username and $this->user != static::$guest_login))
 			{
-				if( false !== $this->get_user_dn($username) )
-				{
-					$this->user = $this->ldap['user'];
-\Log::debug('#1');
-					$this->user['login_hash'] = self::$driver->search($this->user['id']);
-\Log::debug('#2');
-				}
+				$this->user = self::$driver->search($username);
 			}
 
 			// return true when login was verified
@@ -272,7 +267,8 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		}
 
 		$this->user = $this->ldap['user'];
-\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($this->ldap,true));
+
+		self::$driver->update($this->user);
 
 		return $this->user ?: false;
 	}
@@ -336,6 +332,9 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	 */
 	public function logout()
 	{
+		if ($this->user) {
+			self::$driver->clear_hash($this->user['id'], $this->user['login_hash']);
+		}
 		$this->user = self::g('guest_login', true) ? static::$guest_login : false;
 		\Session::delete('username');
 		\Session::delete('login_hash');
@@ -581,7 +580,7 @@ return false;
 			throw new \LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
 		}
 
-		$login_hash = self::$driver->create($this->user['id'], self::g('create_when_not_found', false));
+		$login_hash = self::$driver->create_hash($this->user['id'], self::g('create_when_not_found', false));
 
 		$this->user['login_hash'] = $login_hash;
 
