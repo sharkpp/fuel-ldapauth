@@ -1,0 +1,26 @@
+branches:
+  only:
+    - 'master'
+
+language: php
+
+php:
+  - 5.3
+  - 5.4
+
+env:
+  - BRANCHES=1.5/master
+  - BRANCHES=1.4/master
+
+before_install:
+  - git clone --recursive --quiet --branch=$BRANCHES git://github.com/fuel/fuel.git "$HOME/fuelphp"
+
+before_script:
+  - ln -sf "`pwd`" "$HOME/fuelphp/fuel/packages/ouisearch"
+  - cp -f "`pwd`/tests/travis-ci/config.php"  "$HOME/fuelphp/fuel/app/config/"
+  - cp -f "`pwd`/tests/travis-ci/test/db.php" "$HOME/fuelphp/fuel/app/config/test/"
+  - mysql -e 'create database fuel_test;'
+
+script:
+  - phpunit -c "$HOME/fuelphp/fuel/core/phpunit.xml" --group=LdapAuthPackage --coverage-text
+

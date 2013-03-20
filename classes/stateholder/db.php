@@ -36,7 +36,7 @@ class Stateholder_Db extends Stateholder_Driver
 	{
 		$last_login = \Date::forge()->get_timestamp();
 		$login_hash = sha1(self::g('login_hash_salt').$user.$last_login);
-\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.'$last_login='.$last_login.',$login_hash='.$login_hash);
+//\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.'$last_login='.$last_login.',$login_hash='.$login_hash);
 
 		$r = \DB::update(self::g('table_name'))
 				->set(array(
@@ -45,7 +45,7 @@ class Stateholder_Db extends Stateholder_Driver
 					))
 				->where(self::g('username_field', 'username'), '=', $user)
 				->execute(self::g('db_connection'));
-\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
+//\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
 
 		if (!$r &&
 			$create_when_not_found) {
@@ -57,7 +57,7 @@ class Stateholder_Db extends Stateholder_Driver
 					    	self::g('last_login_field', 'last_login') => $last_login,
 						))
 					->execute(self::g('db_connection'));
-\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
+//\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
 		}
 
 		return $r ? $login_hash : false;
@@ -71,7 +71,7 @@ class Stateholder_Db extends Stateholder_Driver
 			->from(self::g('table_name'))
 				->where(self::g('username_field', 'username'), $user)
 				->execute(self::g('db_connection'));
-\Log::debug(print_r($result,true));
+//\Log::debug(print_r($result,true));
 		return empty($result)
 				? false
 				: array(
@@ -100,14 +100,14 @@ $r=
 				->where(self::g('username_field', 'username'), $user_info['id'])
 				->where_close()
 			->execute(self::g('db_connection'));
-\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
+//\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
 	}
 
 	//ハッシュ検証
 	// ユーザー名、ハッシュ
 	public function validate_hash($user, $hash)
 	{
-\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$hash='.$hash);
+//\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$hash='.$hash);
 		$result = \DB::select()
 			->from(self::g('table_name'))
 				->where_open()
@@ -115,7 +115,7 @@ $r=
 					->where_and(self::g('last_login_field', 'last_login'), $hash)
 					->where_close()
 			->execute(self::g('db_connection'));
-\Log::debug(__FILE__.'('.__LINE__.'):count($result)='.count($result));
+//\Log::debug(__FILE__.'('.__LINE__.'):count($result)='.count($result));
 
 		return !empty($result);
 	}
@@ -124,7 +124,7 @@ $r=
 	// ユーザー名、ハッシュ
 	public function clear_hash($user, $hash)
 	{
-\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$hash='.$hash);
+//\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$hash='.$hash);
 //		$result = \DB::delete(g('table_name'))
 //				->where_open()
 //					->where(g('username_field', 'username'), $user)
@@ -142,7 +142,7 @@ $r=
 			//	->where_and(self::g('last_login_field', 'last_login'), $hash)
 				->where_close()
 			->execute(self::g('db_connection'));
-\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
+//\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($r,true));
 
 		return true;
 	}
