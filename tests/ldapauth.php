@@ -32,6 +32,10 @@ class Tests_LdapAuth extends \TestCase
 
 	public function setup()
 	{
+	//	\Autoloader::add_classes(array(
+	//			'Ldap', __DIR__.'/classes/ldap.php',
+	//		));
+
 		// load configuration
 		\Config::load('ldapauth', true);
 		\Config::load('simpleauth', true);
@@ -94,7 +98,7 @@ class Tests_LdapAuth extends \TestCase
 	}
 
 	/**
-	 * Tests OuiSearch::lookup()
+	 * Tests LdapAuth::login()
 	 *
 	 * @test
 	 */
@@ -105,6 +109,10 @@ class Tests_LdapAuth extends \TestCase
 
 		$auth = \Auth::instance();
 		$this->assertNotEquals(null, $auth);
+
+		$_POST[self::$username_post_key] = 'john';
+		$_POST[self::$password_post_key] = 'aaaa';
+		$this->assertFalse($auth->login());
 
 		$_POST[self::$username_post_key] = 'john';
 		$_POST[self::$password_post_key] = 'test';

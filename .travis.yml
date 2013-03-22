@@ -16,7 +16,7 @@ before_install:
   - git clone --recursive --quiet --branch=$BRANCHES git://github.com/fuel/fuel.git "$HOME/fuelphp"
 
 before_script:
-  - ln -sf "`pwd`" "$HOME/fuelphp/fuel/packages/ouisearch"
+  - ln -sf "`pwd`" "$HOME/fuelphp/fuel/packages/ldapauth"
   - cp -f "`pwd`/tests/travis-ci/config.php"  "$HOME/fuelphp/fuel/app/config/"
   - cp -f "`pwd`/tests/travis-ci/test/db.php" "$HOME/fuelphp/fuel/app/config/test/"
   - mysql -e 'create database fuel_test;'

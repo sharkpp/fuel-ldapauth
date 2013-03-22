@@ -10,11 +10,6 @@
  * @link       https://www.sharkpp.net/
  */
 
-if (!defined('LDAP_DEREF_NEVER'))
-{
-	define('LDAP_DEREF_NEVER', 0);
-}
-
 class Ldap
 {
 	protected $conn = null;
