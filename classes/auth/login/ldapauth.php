@@ -12,7 +12,7 @@
 
 namespace LdapAuth;
 
-require_once((\Fuel::$env != \Fuel::TEST ? __DIR__.'/../../' : __DIR__.'/../../../tests/classes/').'ldap.php');
+//require_once((\Fuel::$env != \Fuel::TEST ? __DIR__.'/../../' : __DIR__.'/../../../tests/classes/').'ldap.php');
 
 class LdapUserUpdateException extends \FuelException {}
 
@@ -79,7 +79,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 		if( !$ldap )
 		{
-			//\Log::debug('not connection to ldap server');
+			logger(\Fuel::L_DEBUG, 'not connection to ldap server');
 			return false;
 		}
 
@@ -87,7 +87,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		$r = $ldap->bind(self::g('username', ''), self::g('password'));
 		if( !$r )
 		{
-			//\Log::error('bind error in "'.self::g('username', '').'": "'.$ldap->error().'"');
+			logger(\Fuel::L_ERROR, 'bind error in "'.self::g('username', '').'": "'.$ldap->error().'"');
 			return false;
 		}
 
@@ -106,28 +106,28 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		$sr = $ldap->search(self::g('basedn'), $query, $filter);
 		if( !$sr )
 		{
-			//\Log::debug('search error in "'.self::g('username', '').'": "'.$ldap->error().'"');
+			logger(\Fuel::L_DEBUG, 'search error in "'.self::g('username', '').'": "'.$ldap->error().'"');
 			return false;
 		}
-//\Log::info('query = "'.$query.'"');
-//\Log::info('filter = '.print_r($filter,true).'');
+logger(\Fuel::L_INFO, 'query = "'.$query.'"');
+logger(\Fuel::L_INFO, 'filter = '.print_r($filter,true).'');
 
 		$ent = $sr->get_entries();
 		if( false === $ent ||
 			!isset($ent[0]['dn']) )
 		{
-			//\Log::debug('get entries error in "'.self::g('username', '').'": "'.$ldap->error().'" "'.$query.'"');
+			logger(\Fuel::L_DEBUG, 'get entries error in "'.self::g('username', '').'": "'.$ldap->error().'" "'.$query.'"');
 			return false;
 		}
 
 	/*	if( !$ldap->unbind() )
 		{
-			//\Log::debug('unbind error in "'.self::g('username', '').'": "'.$ldap->error().'"');
+			logger(\Fuel::L_DEBUG, 'unbind error in "'.self::g('username', '').'": "'.$ldap->error().'"');
 		}*/
 
 		$userdn = $ent[0]['dn'];
-//\Log::info('user dn = "'.$userdn.'"');
-//\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($ent,true));
+logger(\Fuel::L_INFO, 'user dn = "'.$userdn.'"');
+logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 
 		$email_field     = self::g('email');
 		$firstname_field = self::g('firstname');
@@ -163,19 +163,19 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 		if( !$ldap )
 		{
-			//\Log::debug('not connection to ldap server');
+			logger(\Fuel::L_DEBUG, 'not connection to ldap server');
 			return false;
 		}
 
 		if( !$ldap->bind($userdn, $password) )
 		{
-			//\Log::debug('bind error in "'.$userdn.'": "'.$ldap->error().'"');
+			logger(\Fuel::L_DEBUG, 'bind error in "'.$userdn.'": "'.$ldap->error().'"');
 			return false;
 		}
 
 		if( !$ldap->unbind() )
 		{
-			//\Log::debug('unbind error in "'.$userdn.'": "'.$ldap->error().'"');
+			logger(\Fuel::L_DEBUG, 'unbind error in "'.$userdn.'": "'.$ldap->error().'"');
 		}
 
 		return true;
@@ -196,11 +196,11 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		$this->ldap['conn'] = \Ldap::connect($uri);
 		if( !$this->ldap['conn'] )
 		{
-			//\Log::error('can not connect to ldap server "'.$driver_name.'" "'.$uri.'"');
+			logger(\Fuel::L_ERROR, 'can not connect to ldap server "'.$driver_name.'" "'.$uri.'"');
 		}
 		else
 		{
-			//\Log::info('connect to "'.$uri.'" -> '.print_r($this->ldap['conn'], true));
+			logger(\Fuel::L_INFO, 'connect to "'.$uri.'" -> '.print_r($this->ldap['conn'], true));
 			// for Windows Server
 			$this->ldap['conn']->set_option(LDAP_OPT_PROTOCOL_VERSION, 3);
 			$this->ldap['conn']->set_option(LDAP_OPT_REFERRALS, 0);
@@ -209,7 +209,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 	function __destruct()
 	{
-	//\Log::info('call __destruct '.print_r($this->ldap['conn'], true));
+	logger(\Fuel::L_INFO, 'call __destruct '.print_r($this->ldap['conn'], true));
 	}
 
 	/**
@@ -221,11 +221,11 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	{
 		$username    = \Session::get('username');
 		$login_hash  = \Session::get('login_hash');
-//\Log::debug('"'.$username.'" "'.$login_hash.'"');
+logger(\Fuel::L_DEBUG, '"'.$username.'" "'.$login_hash.'"');
 		// only worth checking if there's both a username and login-hash
 		if ( ! empty($username) and ! empty($login_hash))
 		{
-//\Log::debug(__FILE__.'('.__LINE__.'):'.print_r($this->user,true));
+logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($this->user,true));
 			if (is_null($this->user) or ($this->user['id'] != $username and $this->user != static::$guest_login))
 			{
 				$this->user = self::$driver->search($username);
