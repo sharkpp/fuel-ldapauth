@@ -41,16 +41,53 @@ class Ldap
 	protected $binded = false;
 	protected $last_err = '';
 
+	protected static $link_id = 0;
+
 	const TEST_LINK_ID   = 123456;
 	const TEST_SEARCH_ID = 123456;
 
-	protected $users = array(
-				'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
-			);
+	protected static $data = array('xxx');
 
 	public static function connect($hostname = NULL, $port = 389)
 	{
-		return new Ldap(self::TEST_LINK_ID);
+		self::$link_id++;
+logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.'):'.self::$link_id);
+
+		if (!isset(self::$data['host']))
+		{
+			return false;
+		}
+
+		$host_   = self::$data['host'];
+		$port_   = self::$data['port'];
+		$secure_ = self::$data['secure'];
+
+		if ($hostname != $host_ ||
+			$port     != $port_  ||
+			$secure_ )
+		{
+			$url_parts = parse_url($hostname);
+			foreach(array('scheme' => '', 'host' => '', 'port' => 389) as $key => $val)
+				$url_parts[$key] = isset($url_parts[$key]) ? $url_parts[$key] : $val;
+			if ($host_  != $url_parts['host'] ||
+			    $port_  != $url_parts['port'] ||
+			    ( $secure_ && 'ldap'  == $url_parts['scheme']) ||
+			    (!$secure_ && 'ldaps' == $url_parts['scheme']) )
+			{
+				return null;
+			}
+		}
+logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.'):'.self::$link_id);
+		return new Ldap(self::$link_id);
+	}
+
+	public static function set_test_data($data)
+	{
+logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
+		foreach(array('host' => '', 'port' => 389, 'secure' => false, 'users' => array()) as $key => $val)
+			$data[$key] = isset($data[$key]) ? $data[$key] : $val;
+		self::$data = $data;
+logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
 	}
 
 	public function __construct($link_identifier)
@@ -62,7 +99,7 @@ class Ldap
 
 	public function error()
 	{
-		if (self::TEST_LINK_ID != $this->conn) {
+		if (null == $this->conn) {
 			return 'not connected';
 		}
 		return $this->last_err;
@@ -70,7 +107,7 @@ class Ldap
 
 	public function set_option($option, $newval)
 	{
-		if (self::TEST_LINK_ID != $this->conn) {
+		if (null == $this->conn) {
 			return false;
 		}
 		$this->last_err = '';
@@ -79,7 +116,7 @@ class Ldap
 
 	public function bind($bind_rdn = NULL, $bind_password = NULL)
 	{
-		if (self::TEST_LINK_ID != $this->conn) {
+		if (null == $this->conn) {
 			$this->last_err = 'not connected';
 			return false;
 		}
@@ -92,16 +129,20 @@ class Ldap
 
 		if ($bind_rdn == \Config::get('ldapauth.username', ''))
 		{
+			if ($bind_password == \Config::get('ldapauth.paddword', '')) {
+				$this->last_err = 'bind error #2';
+				return false;
+			}
 			$this->binded = true;
 			$this->last_err = '';
 		}
-		else if (array_key_exists($username, $this->users) &&
-		         $bind_password === $this->users[$username]['password']) {
+		else if (array_key_exists($username, self::$data['users']) &&
+		         $bind_password === self::$data['users'][$username]['password']) {
 			$this->binded = true;
 			$this->last_err = '';
 		}
 		else {
-			$this->last_err = 'bind error #2';
+			$this->last_err = 'bind error #3';
 			return false;
 		}
 		return true;
@@ -109,7 +150,7 @@ class Ldap
 
 	public function unbind()
 	{
-		if (self::TEST_LINK_ID != $this->conn) {
+		if (null == $this->conn) {
 			$this->last_err = 'not connected';
 			return false;
 		}
@@ -123,7 +164,7 @@ class Ldap
 	public function search($base_dn, $filter, $attributes = 0, $attrsonly = 0, $sizelimit = 0, $timelimit = 0, $deref = LDAP_DEREF_NEVER)
 	{
 
-		if (self::TEST_LINK_ID != $this->conn) {
+		if (null == $this->conn) {
 			return false;
 		}
 		if (!$this->binded) {
@@ -137,12 +178,12 @@ class Ldap
 		}
 		$username = $m[1];
 
-		if (!array_key_exists($username, $this->users)) {
+		if (!array_key_exists($username, self::$data['users'])) {
 			return false;
 		}
 
 		return new LdapSearch($this->conn,
-		                      array_merge($this->users[$username],
+		                      array_merge(self::$data['users'][$username],
 		                                  array('account' => $username,
 		                                        'dn' => \Config::get('ldapauth.basedn', '').',USER='.$username)));
 	}
@@ -164,7 +205,7 @@ class LdapSearch
 
 	public function get_entries()
 	{
-		if (self::TEST_LINK_ID != $this->conn || empty($this->result)) {
+		if (null == $this->conn || empty($this->result)) {
 			return false;
 		}
 		return array($this->result);

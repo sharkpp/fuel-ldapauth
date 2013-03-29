@@ -17,7 +17,8 @@ before_install:
 
 before_script:
   - ln -sf "`pwd`" "$HOME/fuelphp/fuel/packages/ldapauth"
-  - cp -fr "`pwd`/tests/travis-ci/*"  "$HOME/fuelphp/fuel/app/config/"
+  - cp -f "`pwd`/tests/travis-ci/*.php"      "$HOME/fuelphp/fuel/app/config/"
+  - cp -f "`pwd`/tests/travis-ci/test/*.php" "$HOME/fuelphp/fuel/app/config/test/"
   - mysql -e 'create database fuel_test;'
 
 script:

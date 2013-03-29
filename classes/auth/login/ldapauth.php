@@ -181,10 +181,9 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 		return true;
 	}
 
-	function __construct()
+	function __construct(Array $config)
 	{
-		//
-	//	$this->config['drivers'] = self::g('drivers', $this->config['drivers']);
+		parent::__construct($config);
 
 		// ldapサーバーと接続
 		$uri = sprintf('%s://%s:%d/'
@@ -196,11 +195,11 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 		$this->ldap['conn'] = \Ldap::connect($uri);
 		if( !$this->ldap['conn'] )
 		{
-			logger(\Fuel::L_ERROR, 'can not connect to ldap server "'.$driver_name.'" "'.$uri.'"');
+			logger(\Fuel::L_ERROR, 'can not connect to ldap server "'.self::g('driver', 'Db').'" "'.$uri.'"');
 		}
 		else
 		{
-			logger(\Fuel::L_INFO, 'connect to "'.$uri.'" -> '.print_r($this->ldap['conn'], true));
+			logger(\Fuel::L_INFO, 'connect to "'.$uri.'" -> '.str_replace("\n", '', var_export($this->ldap['conn'], true)));
 			// for Windows Server
 			$this->ldap['conn']->set_option(LDAP_OPT_PROTOCOL_VERSION, 3);
 			$this->ldap['conn']->set_option(LDAP_OPT_REFERRALS, 0);
@@ -209,7 +208,11 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 
 	function __destruct()
 	{
-	logger(\Fuel::L_INFO, 'call __destruct '.print_r($this->ldap['conn'], true));
+		if ($this->ldap['conn'])
+		{
+			$this->ldap['conn']->unbind();
+			$this->ldap['conn'] = null;
+		}
 	}
 
 	/**
@@ -221,7 +224,7 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 	{
 		$username    = \Session::get('username');
 		$login_hash  = \Session::get('login_hash');
-logger(\Fuel::L_DEBUG, '"'.$username.'" "'.$login_hash.'"');
+logger(\Fuel::L_DEBUG, 'username="'.$username.'" login_hash="'.$login_hash.'"');
 		// only worth checking if there's both a username and login-hash
 		if ( ! empty($username) and ! empty($login_hash))
 		{
