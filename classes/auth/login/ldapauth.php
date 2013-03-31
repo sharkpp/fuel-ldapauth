@@ -256,6 +256,8 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 		$username_or_email = trim($username_or_email) ?: trim(\Input::post(self::g('username_post_key', 'username')));
 		$password = trim($password) ?: trim(\Input::post(self::g('password_post_key', 'password')));
 
+		$this->user = null;
+
 		if (empty($username_or_email) or empty($password))
 		{
 			return false;

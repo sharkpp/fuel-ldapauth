@@ -91,10 +91,10 @@ class Stateholder_Db extends Stateholder_Driver
 $r=
 		\DB::update(self::g('table_name'))
 			->set(array(
-		    		self::g('username_field',   'username')   => $user_info['id'],
-		    		self::g('group_field',      'group')      => $user_info['group'],
-		    		self::g('email_field',      'email')      => $user_info['email'],
-		    		self::g('login_hash_field', 'login_hash') => $user_info['login_hash'],
+					self::g('username_field',   'username')   => $user_info['id'],
+				//	self::g('group_field',      'group')      => $user_info['group'], // Ldapサーバーからは取得できない情報なので更新しない
+					self::g('email_field',      'email')      => $user_info['email'],
+					self::g('login_hash_field', 'login_hash') => $user_info['login_hash'],
 				))
 			->where_open()
 				->where(self::g('username_field', 'username'), $user_info['id'])

@@ -83,14 +83,15 @@ class Ldap
 	public static function set_test_data($data)
 	{
 		foreach(array(
-				'host'     => \Config::get('ldapauth.host', ''),
-				'port'     => \Config::get('ldapauth.port', 839),
-				'secure'   => \Config::get('ldapauth.secure', false),
-				'username' => \Config::get('ldapauth.username', ''),
-				'password' => \Config::get('ldapauth.password', 'password'),
-				'basedn'   => \Config::get('ldapauth.basedn', 'xxx'),
-				'account'  => \Config::get('ldapauth.account', 'sAMAccountName'),
-				'users'    => array()
+				'host'        => \Config::get('ldapauth.host', ''),
+				'port'        => \Config::get('ldapauth.port', 839),
+				'secure'      => \Config::get('ldapauth.secure', false),
+				'username'    => \Config::get('ldapauth.username', ''),
+				'password'    => \Config::get('ldapauth.password', 'password'),
+				'basedn'      => \Config::get('ldapauth.basedn', 'xxx'),
+				'account'     => \Config::get('ldapauth.account', 'sAMAccountName'),
+				'guest_login' => \Config::get('ldapauth.guest_login', true),
+				'users'       => array()
 			) as $key => $val)
 		{
 			$data[$key] = isset($data[$key]) ? $data[$key] : $val;

@@ -20,12 +20,7 @@ namespace LdapAuthPackage;
  */
 class Tests_Basic extends \TestCase
 {
-//	protected $fixture;
-	const DEFAULT_TABLE_NAME       = 'users';
-	const DEFAULT_LOGIN_HASH_FIELD = 'login_hash';
-	const DEFAULT_LAST_LOGIN_FIELD = 'last_login';
-	const DEFAULT_USERNAME_FIELD   = 'username';
-	const DEFAULT_GROUP_FIELD      = 'group';
+	const DEFAULT_TABLE_NAME = 'users';
 
 	protected static $username_post_key;
 	protected static $password_post_key;
@@ -39,7 +34,7 @@ class Tests_Basic extends \TestCase
 		\Config::load('simpleauth', true);
 
 		self::$config     = empty(self::$config) ? \Config::get('ldapauth') : self::$config;
-		$table_name       = \Config::get('ldapauth.db.table_name',       self::DEFAULT_TABLE_NAME);
+		$table_name       = \Config::get('ldapauth.db.table_name', self::DEFAULT_TABLE_NAME);
 
 		self::$username_post_key = \Config::get('simpleauth.username_post_key');
 		self::$password_post_key = \Config::get('simpleauth.password_post_key');
@@ -54,6 +49,7 @@ class Tests_Basic extends \TestCase
 			\Migrate::latest('ldapauth', 'package');
 		}
 
+		\Session::create();
 	}
 
 	public function teardown()
