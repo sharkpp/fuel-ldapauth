@@ -18,7 +18,7 @@ namespace LdapAuthPackage;
  * @group Package
  * @group LdapAuthPackage
  */
-class Tests_LdapAuthBasic extends \TestCase
+class Tests_Basic extends \TestCase
 {
 //	protected $fixture;
 	const DEFAULT_TABLE_NAME       = 'users';
@@ -43,10 +43,21 @@ class Tests_LdapAuthBasic extends \TestCase
 		\Config::load('ldapauth', true);
 		\Config::load('simpleauth', true);
 
-		self::$config = empty($this->ldapauth) ? \Config::get('ldapauth') : self::$config;
+		self::$config     = empty(self::$config) ? \Config::get('ldapauth') : self::$config;
+		$table_name       = \Config::get('ldapauth.db.table_name',       self::DEFAULT_TABLE_NAME);
 
 		self::$username_post_key = \Config::get('simpleauth.username_post_key');
 		self::$password_post_key = \Config::get('simpleauth.password_post_key');
+
+		// truncate table
+		if (\DBUtil::table_exists($table_name))
+		{
+			\DBUtil::truncate_table($table_name);
+		}
+		else
+		{
+			\Migrate::latest('ldapauth', 'package');
+		}
 
 	}
 
