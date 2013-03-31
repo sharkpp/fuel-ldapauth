@@ -51,7 +51,6 @@ class Ldap
 	public static function connect($hostname = NULL, $port = 389)
 	{
 		self::$link_id++;
-logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.'):'.self::$link_id);
 
 		if (!isset(self::$data['host']))
 		{
@@ -77,17 +76,26 @@ logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.'):'.self::$link_id);
 				return null;
 			}
 		}
-logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.'):'.self::$link_id);
+
 		return new Ldap(self::$link_id);
 	}
 
 	public static function set_test_data($data)
 	{
-logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
-		foreach(array('host' => '', 'port' => 389, 'secure' => false, 'users' => array()) as $key => $val)
+		foreach(array(
+				'host'     => \Config::get('ldapauth.host', ''),
+				'port'     => \Config::get('ldapauth.port', 839),
+				'secure'   => \Config::get('ldapauth.secure', false),
+				'username' => \Config::get('ldapauth.username', ''),
+				'password' => \Config::get('ldapauth.password', 'password'),
+				'basedn'   => \Config::get('ldapauth.basedn', 'xxx'),
+				'account'  => \Config::get('ldapauth.account', 'sAMAccountName'),
+				'users'    => array()
+			) as $key => $val)
+		{
 			$data[$key] = isset($data[$key]) ? $data[$key] : $val;
+		}
 		self::$data = $data;
-logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
 	}
 
 	public function __construct($link_identifier)
@@ -125,11 +133,11 @@ logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
 	//		return false;
 	//	}
 
-		$username = str_replace(\Config::get('ldapauth.basedn', '').',USER=', '', $bind_rdn);
+		$username = str_replace(self::$data['basedn'].',USER=', '', $bind_rdn);
 
-		if ($bind_rdn == \Config::get('ldapauth.username', ''))
+		if ($bind_rdn == self::$data['username'])
 		{
-			if ($bind_password == \Config::get('ldapauth.paddword', '')) {
+			if ($bind_password != self::$data['password']) {
 				$this->last_err = 'bind error #2';
 				return false;
 			}
@@ -170,10 +178,10 @@ logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
 		if (!$this->binded) {
 			return false;
 		}
-		if ($base_dn != \Config::get('ldapauth.basedn', '')) {
+		if ($base_dn != self::$data['basedn']) {
 			return false;
 		}
-		if (!preg_match('/'.\Config::get('ldapauth.account', 'sAMAccountName').'=([^)]+)/', $filter, $m)) {
+		if (!preg_match('/'.self::$data['account'].'=([^)]+)/', $filter, $m)) {
 			return false;
 		}
 		$username = $m[1];
@@ -185,7 +193,7 @@ logger(\Fuel::L_INFO, ''.__METHOD__.'('.__LINE__.')');
 		return new LdapSearch($this->conn,
 		                      array_merge(self::$data['users'][$username],
 		                                  array('account' => $username,
-		                                        'dn' => \Config::get('ldapauth.basedn', '').',USER='.$username)));
+		                                        'dn' => self::$data['basedn'].',USER='.$username)));
 	}
 }
 
