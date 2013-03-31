@@ -92,6 +92,7 @@ class Tests_Basic extends \TestCase
 		$_POST[self::$password_post_key] = 'test';
 		$this->assertTrue($auth->login());
 	}
+
 	/**
 	 * Tests LdapAuth::login() with non secure
 	 *
@@ -106,6 +107,40 @@ class Tests_Basic extends \TestCase
 				),
 			));
 		\Config::set('ldapauth.secure', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		// is login failed?
+		$_POST[self::$username_post_key] = 'john';
+		$_POST[self::$password_post_key] = 'aaaa';
+		$this->assertFalse($auth->login());
+
+		// is login successful?
+		$_POST[self::$username_post_key] = 'john';
+		$_POST[self::$password_post_key] = 'test';
+		$this->assertTrue($auth->login());
+	}
+
+	/**
+	 * Tests LdapAuth::login() with non secure
+	 *
+	 * @test
+	 */
+	public function test_login_non_secure_ok3()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::delete('ldapauth.account');
+		\Config::delete('ldapauth.email');
+		\Config::delete('ldapauth.firstname');
+		\Config::delete('ldapauth.lastname');
 
 		// is instance load successful?
 		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
@@ -238,6 +273,87 @@ class Tests_Basic extends \TestCase
 				'secure'=> false,
 				'users' => array(
 					'smith' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		// is login failed?
+		$_POST[self::$username_post_key] = 'john';
+		$_POST[self::$password_post_key] = 'test';
+		$this->assertFalse($auth->login());
+	}
+
+	/**
+	 * Tests LdapAuth::login() with non secure and connect failed
+	 *
+	 * @test
+	 */
+	public function test_login_non_secure_ng_empty_user()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'smith' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		// is login failed?
+		$_POST[self::$username_post_key] = '';
+		$_POST[self::$password_post_key] = '';
+		$this->assertFalse($auth->login());
+	}
+
+	/**
+	 * Tests LdapAuth::login() with non secure and connect failed
+	 *
+	 * @test
+	 */
+	public function test_login_non_secure_ng_no_entries1()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+				'option'=> array(
+					'get_entries_failed' => true,
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		// is login failed?
+		$_POST[self::$username_post_key] = 'john';
+		$_POST[self::$password_post_key] = 'test';
+		$this->assertFalse($auth->login());
+	}
+
+	/**
+	 * Tests LdapAuth::login() with non secure and connect failed
+	 *
+	 * @test
+	 */
+	public function test_login_non_secure_ng_no_entries2()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+				'option'=> array(
+					'get_entries_dn_empty' => true,
 				),
 			));
 		\Config::set('ldapauth.secure', false);

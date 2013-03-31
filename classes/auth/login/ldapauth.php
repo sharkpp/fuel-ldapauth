@@ -79,7 +79,7 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 		if( !$ldap )
 		{
-			logger(\Fuel::L_DEBUG, 'not connection to ldap server');
+			logger(\Fuel::L_ERROR, 'not connection to ldap server');
 			return false;
 		}
 
@@ -109,8 +109,9 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			logger(\Fuel::L_DEBUG, 'search error in "'.self::g('username', '').'": "'.$ldap->error().'"');
 			return false;
 		}
-logger(\Fuel::L_INFO, 'query = "'.$query.'"');
-logger(\Fuel::L_INFO, 'filter = '.print_r($filter,true).'');
+
+		logger(\Fuel::L_DEBUG, 'query = "'.$query.'"');
+		logger(\Fuel::L_DEBUG, 'filter = '.print_r($filter,true).'');
 
 		$ent = $sr->get_entries();
 		if( false === $ent ||
@@ -126,8 +127,9 @@ logger(\Fuel::L_INFO, 'filter = '.print_r($filter,true).'');
 		}*/
 
 		$userdn = $ent[0]['dn'];
-logger(\Fuel::L_INFO, 'user dn = "'.$userdn.'"');
-logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
+
+		logger(\Fuel::L_DEBUG, 'user dn = "'.$userdn.'"');
+		logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 
 		$email_field     = self::g('email');
 		$firstname_field = self::g('firstname');
@@ -169,7 +171,7 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 
 		if( !$ldap->bind($userdn, $password) )
 		{
-			logger(\Fuel::L_DEBUG, 'bind error in "'.$userdn.'": "'.$ldap->error().'"');
+			logger(\Fuel::L_ERROR, 'bind error in "'.$userdn.'": "'.$ldap->error().'"');
 			return false;
 		}
 
@@ -199,19 +201,11 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 		}
 		else
 		{
-			logger(\Fuel::L_INFO, 'connect to "'.$uri.'" -> '.str_replace("\n", '', var_export($this->ldap['conn'], true)));
+			logger(\Fuel::L_DEBUG, 'connect to "'.$uri.'" -> '.str_replace("\n", '', var_export($this->ldap['conn'], true)));
+
 			// for Windows Server
 			$this->ldap['conn']->set_option(LDAP_OPT_PROTOCOL_VERSION, 3);
 			$this->ldap['conn']->set_option(LDAP_OPT_REFERRALS, 0);
-		}
-	}
-
-	function __destruct()
-	{
-		if ($this->ldap['conn'])
-		{
-			$this->ldap['conn']->unbind();
-			$this->ldap['conn'] = null;
 		}
 	}
 
@@ -224,11 +218,14 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
 	{
 		$username    = \Session::get('username');
 		$login_hash  = \Session::get('login_hash');
-logger(\Fuel::L_DEBUG, 'username="'.$username.'" login_hash="'.$login_hash.'"');
+
+		logger(\Fuel::L_DEBUG, 'username="'.$username.'" login_hash="'.$login_hash.'"');
+
 		// only worth checking if there's both a username and login-hash
 		if ( ! empty($username) and ! empty($login_hash))
 		{
-logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($this->user,true));
+			logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($this->user,true));
+
 			if (is_null($this->user) or ($this->user['id'] != $username and $this->user != static::$guest_login))
 			{
 				$this->user = self::$driver->search($username);

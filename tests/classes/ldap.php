@@ -98,6 +98,15 @@ class Ldap
 		self::$data = $data;
 	}
 
+	public static function is($key)
+	{
+		return
+			isset(self::$data['option']) &&
+			isset(self::$data['option'][$key])
+				? self::$data['option'][$key]
+				: false;
+	}
+
 	public function __construct($link_identifier)
 	{
 		\Config::load('ldapauth', true);
@@ -215,6 +224,14 @@ class LdapSearch
 	{
 		if (null == $this->conn || empty($this->result)) {
 			return false;
+		}
+		if (Ldap::is('get_entries_failed')) {
+			return false;
+		}
+		if (Ldap::is('get_entries_dn_empty')) {
+			$result = $this->result;
+			unset($result['dn']);
+			return array($result);
 		}
 		return array($this->result);
 	}
