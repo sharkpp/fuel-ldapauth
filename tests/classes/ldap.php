@@ -90,7 +90,6 @@ class Ldap
 				'password'    => \Config::get('ldapauth.password', 'password'),
 				'basedn'      => \Config::get('ldapauth.basedn', 'xxx'),
 				'account'     => \Config::get('ldapauth.account', 'sAMAccountName'),
-				'guest_login' => \Config::get('ldapauth.guest_login', true),
 				'users'       => array()
 			) as $key => $val)
 		{

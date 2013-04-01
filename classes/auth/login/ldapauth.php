@@ -317,15 +317,16 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 			return false;
 		}
 
-//		$this->user = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
+		$this->user = self::$driver->search($user_id);
 
-//		if ($this->user == false)
-//		{
-//			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
-//			\Session::delete('username');
-//			\Session::delete('login_hash');
-//	/		return false;
-//		}
+logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($this->user,true));
+		if ( false === $this->user )
+		{
+			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
+			\Session::delete('username');
+			\Session::delete('login_hash');
+			return false;
+		}
 
 		\Session::set('username', $this->user['username']);
 		\Session::set('login_hash', $this->create_login_hash());
@@ -366,7 +367,7 @@ return false;
 
 		if (empty($username) or empty($password) or empty($email))
 		{
-			throw new \LdapUserUpdateException('Username, password and email address can\'t be empty.', 1);
+			throw new LdapUserUpdateException('Username, password and email address can\'t be empty.', 1);
 		}
 
 		$same_users = \DB::select_array(\Config::get('ldapauth.table_columns', array('*')))
@@ -379,11 +380,11 @@ return false;
 		{
 			if (in_array(strtolower($email), array_map('strtolower', $same_users->current())))
 			{
-				throw new \LdapUserUpdateException('Email address already exists', 2);
+				throw new LdapUserUpdateException('Email address already exists', 2);
 			}
 			else
 			{
-				throw new \LdapUserUpdateException('Username already exists', 3);
+				throw new LdapUserUpdateException('Username already exists', 3);
 			}
 		}
 
@@ -421,13 +422,13 @@ return false;
 
 		if (empty($current_values))
 		{
-			throw new \LdapUserUpdateException('Username not found', 4);
+			throw new LdapUserUpdateException('Username not found', 4);
 		}
 
 		$update = array();
 		if (array_key_exists('username', $values))
 		{
-			throw new \LdapUserUpdateException('Username cannot be changed.', 5);
+			throw new LdapUserUpdateException('Username cannot be changed.', 5);
 		}
 		if (array_key_exists('password', $values))
 		{
@@ -440,7 +441,7 @@ return false;
 			$password = trim(strval($values['password']));
 			if ($password === '')
 			{
-				throw new \LdapUserUpdateException('Password can\'t be empty.', 6);
+				throw new LdapUserUpdateException('Password can\'t be empty.', 6);
 			}
 			$update['password'] = $this->hash_password($password);
 			unset($values['password']);
@@ -454,7 +455,7 @@ return false;
 			$email = filter_var(trim($values['email']), FILTER_VALIDATE_EMAIL);
 			if ( ! $email)
 			{
-				throw new \LdapUserUpdateException('Email address is not valid', 7);
+				throw new LdapUserUpdateException('Email address is not valid', 7);
 			}
 			$update['email'] = $email;
 			unset($values['email']);
@@ -543,7 +544,7 @@ return false;
 
 		if ( ! $affected_rows)
 		{
-			throw new \LdapUserUpdateException('Failed to reset password, user was invalid.', 8);
+			throw new LdapUserUpdateException('Failed to reset password, user was invalid.', 8);
 		}
 
 		return $new_password;
@@ -560,7 +561,7 @@ return false;
 return false;
 		if (empty($username))
 		{
-			throw new \LdapUserUpdateException('Cannot delete user with empty username', 9);
+			throw new LdapUserUpdateException('Cannot delete user with empty username', 9);
 		}
 
 		$affected_rows = \DB::delete(\Config::get('ldapauth.table_name'))
@@ -584,7 +585,7 @@ return false;
 
 		if (empty($this->user))
 		{
-			throw new \LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
+			throw new LdapUserUpdateException('User not logged in, can\'t create login hash.', 10);
 		}
 
 		$login_hash = self::$driver->create_hash($this->user['id'], self::g('create_when_not_found', false));

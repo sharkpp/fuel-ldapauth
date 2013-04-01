@@ -68,12 +68,12 @@ class Tests_Login extends \TestCase
 	{
 		\Ldap::set_test_data(array(
 				'secure'=> false,
-				'guest_login'=> false,
 				'users' => array(
 					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
 				),
 			));
 		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
 
 		// is instance load successful?
 		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
@@ -122,12 +122,12 @@ class Tests_Login extends \TestCase
 	{
 		\Ldap::set_test_data(array(
 				'secure'=> false,
-				'guest_login'=> false,
 				'users' => array(
 					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
 				),
 			));
 		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
 
 		// is instance load successful?
 		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
@@ -165,6 +165,14 @@ class Tests_Login extends \TestCase
 		$this->assertFalse($auth->get_user_id());
 		$this->assertEquals(null, \Session::get('username'));
 		$this->assertEquals(null, \Session::get('login_hash'));
+
+		\Config::set('ldapauth.guest_login', true);
+
+		// is login failed?
+		$this->assertFalse($auth->login('john', 'aaaa'));
+		$this->assertNotEquals(false, $auth->get_user_id());
+		$this->assertEquals(null, \Session::get('username'));
+		$this->assertEquals(null, \Session::get('login_hash'));
 	}
 
 	/**
@@ -176,7 +184,79 @@ class Tests_Login extends \TestCase
 	{
 		\Ldap::set_test_data(array(
 				'secure'=> false,
-				'guest_login'=> false,
+				'users' => array(
+					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$_POST[self::$username_post_key] = 'xxx';
+		$_POST[self::$password_post_key] = 'yyy';
+
+		$this->assertFalse($auth->force_login());
+
+		$this->assertFalse($auth->force_login('smith'));
+
+		// is login failed?
+		$this->assertFalse($auth->login('john', 'aaaa'));
+		$this->assertTrue($auth->force_login('john'));
+
+		$this->assertFalse($auth->force_login());
+
+		\Config::set('ldapauth.guest_login', true);
+	}
+
+	/**
+	 * Tests LdapAuth::logout()
+	 *
+	 * @test
+	 */
+	public function test_logout()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$this->assertTrue($auth->logout());
+
+		$this->assertFalse($auth->get_user_id());
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertTrue($auth->logout());
+		$this->assertFalse($auth->get_user_id());
+
+		\Config::set('ldapauth.guest_login', true);
+
+		$this->assertFalse($auth->get_user_id());
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertTrue($auth->logout());
+		$this->assertNotEquals(false, $auth->get_user_id());
+
+		\Config::set('ldapauth.guest_login', true);
+	}
+
+	/**
+	 * Tests LdapAuth::guest_login()
+	 *
+	 * @test
+	 */
+	public function test_guest_login()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
 				'users' => array(
 					'john' => array('email' => '', 'firstname' => '', 'lastname' => '', 'password' => 'test'),
 				),
@@ -187,12 +267,11 @@ class Tests_Login extends \TestCase
 		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
 		$this->assertNotEquals(null, $auth);
 
-		$_POST[self::$username_post_key] = 'xxx';
-		$_POST[self::$password_post_key] = 'yyy';
+		\Config::set('ldapauth.guest_login', true);
+		$this->assertTrue($auth->guest_login());
 
-		// is login failed?
-		$this->assertFalse($auth->login('john', 'aaaa'));
-		$this->assertTrue($auth->force_login('john'));
+		\Config::set('ldapauth.guest_login', false);
+		$this->assertFalse($auth->guest_login());
 	}
 
 }
