@@ -12,8 +12,6 @@
 
 namespace LdapAuth;
 
-//require_once((\Fuel::$env != \Fuel::TEST ? __DIR__.'/../../' : __DIR__.'/../../../tests/classes/').'ldap.php');
-
 class LdapUserUpdateException extends \FuelException {}
 
 class LdapUserWrongPassword extends \FuelException {}
@@ -29,6 +27,8 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 	public static function _init()
 	{
+		\Fuel::$env == \Fuel::TEST ?: \Autoloader::add_class('Ldap', __DIR__.'/../../ldap.php');
+
 		\Config::load('ldapauth', true, true, true);
 
 		//

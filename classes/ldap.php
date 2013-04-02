@@ -18,7 +18,7 @@ class Ldap
 	{
 		$result = @ldap_connect($hostname, $port);
 
-		if ($result)
+		if (is_resource($result))
 		{
 			return new Ldap($result);
 		}
@@ -47,14 +47,14 @@ class Ldap
 
 	public function unbind()
 	{
-		return @ldap_bind($this->conn);
+		return @ldap_unbind($this->conn);
 	}
 
 	public function search($base_dn, $filter, $attributes = 0, $attrsonly = 0, $sizelimit = 0, $timelimit = 0, $deref = LDAP_DEREF_NEVER)
 	{
-		$result = @ldap_search($this->conn, $base_dn, $filter, attributes);
+		$result = @ldap_search($this->conn, $base_dn, $filter, $attributes);
 
-		if ($result)
+		if (false !== $result)
 		{
 			return new LdapSearch($this->conn, $result);
 		}
