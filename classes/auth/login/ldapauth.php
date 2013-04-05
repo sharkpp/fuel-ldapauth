@@ -322,7 +322,6 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 		$this->user = self::$driver->search($user_id);
 
-logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($this->user,true));
 		if ( false === $this->user )
 		{
 			$this->user = self::g('guest_login', true) ? static::$guest_login : false;

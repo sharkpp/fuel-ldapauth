@@ -102,20 +102,23 @@ class Stateholder_Db extends Stateholder_Driver
 			->from($this->table_name)
 				->where($this->username_field, $user)
 				->execute($this->db_connection);
-//\Log::debug(print_r($result,true));
-		$profile_fields = empty($result) ?: @unserialize($result[0][$this->profile_fields]);
-		return empty($result)
-				? false
-				: array(
-						'id'         => $user,
-						'username'   => $result[0][$this->username_field],
-						'group'      => $result[0][$this->group_field],
-						'email'      => $result[0][$this->email_field],
-						'last_login' => $result[0][$this->last_login_field],
-						'login_hash' => $result[0][$this->login_hash_field],
-						'firstname'  => $profile_fields[$this->firstname_field],
-						'lastname'   => $profile_fields[$this->lastname_field],
-					);
+
+		if (empty($result) || !$result->count())
+		{
+			return false;
+		}
+
+		$profile_fields = @unserialize($result[0][$this->profile_fields]);
+		return array(
+					'id'         => $user,
+					'username'   => $result[0][$this->username_field],
+					'group'      => $result[0][$this->group_field],
+					'email'      => $result[0][$this->email_field],
+					'last_login' => $result[0][$this->last_login_field],
+					'login_hash' => $result[0][$this->login_hash_field],
+					'firstname'  => $profile_fields[$this->firstname_field],
+					'lastname'   => $profile_fields[$this->lastname_field],
+				);
 	}
 
 	// ユーザー情報更新

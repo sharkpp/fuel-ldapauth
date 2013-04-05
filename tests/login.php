@@ -202,6 +202,9 @@ class Tests_Login extends \TestCase
 
 		$this->assertFalse($auth->force_login('smith'));
 
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertTrue($auth->logout());
+
 		// is login failed?
 		$this->assertFalse($auth->login('john', 'aaaa'));
 		$this->assertTrue($auth->force_login('john'));
@@ -274,6 +277,7 @@ class Tests_Login extends \TestCase
 		$this->assertTrue($auth->login('john', 'test'));
 		$this->assertEquals(array(array('LdapGroup', 100)), $auth->get_groups());
 
+		$this->setExpectedException('LdapUserUpdateException');
 		$this->assertFalse($auth->create_user('john', '', 'test@example.net', 100));
 	}
 
