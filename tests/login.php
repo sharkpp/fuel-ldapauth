@@ -235,6 +235,7 @@ class Tests_Login extends \TestCase
 
 		$this->assertFalse($auth->get_user_id());
 		$this->assertTrue($auth->login('john', 'test'));
+
 		$this->assertTrue($auth->logout());
 		$this->assertFalse($auth->get_user_id());
 
@@ -246,6 +247,169 @@ class Tests_Login extends \TestCase
 		$this->assertNotEquals(false, $auth->get_user_id());
 
 		\Config::set('ldapauth.guest_login', true);
+	}
+
+	/**
+	 * Tests LdapAuth::create_user()
+	 *
+	 * @test
+	 */
+	public function test_create_user()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => 'foo@example.net', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$this->assertTrue($auth->create_user('john', '', 'test@example.net', 100));
+
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertEquals(array(array('LdapGroup', 100)), $auth->get_groups());
+
+		$this->assertFalse($auth->create_user('john', '', 'test@example.net', 100));
+	}
+
+	/**
+	 * Tests LdapAuth::change_password()
+	 *
+	 * @test
+	 */
+	public function test_change_password()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => 'foo@example.net', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$this->assertFalse($auth->change_password('test', '1234'));
+		$this->assertFalse($auth->change_password('test', '1234', 'john'));
+
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertFalse($auth->change_password('test', '1234'));
+		$this->assertFalse($auth->change_password('test', '1234', 'john'));
+
+		$this->assertTrue($auth->logout());
+		$this->assertFalse($auth->change_password('test', '1234'));
+		$this->assertFalse($auth->change_password('test', '1234', 'john'));
+	}
+
+	/**
+	 * Tests LdapAuth::reset_password()
+	 *
+	 * @test
+	 */
+	public function test_reset_password()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => 'foo@example.net', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$this->assertEquals('', $auth->reset_password('john'));
+
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertEquals('', $auth->reset_password('john'));
+
+		$this->assertTrue($auth->logout());
+		$this->assertEquals('', $auth->reset_password('john'));
+	}
+
+	/**
+	 * Tests LdapAuth::get_screen_name()
+	 *
+	 * @test
+	 */
+	public function test_get_screen_name()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => '', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$this->assertFalse($auth->get_screen_name());
+
+		$this->assertFalse($auth->login('john', 'xxxx'));
+		$this->assertFalse($auth->get_screen_name());
+
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertEquals('John Smith', $auth->get_screen_name());
+
+		$this->assertTrue($auth->logout());
+		$this->assertFalse($auth->get_screen_name());
+
+		\Config::set('ldapauth.guest_login', true);
+
+		$this->assertFalse($auth->login('john', 'xxxx'));
+		$this->assertEquals('John Doe', $auth->get_screen_name());
+	}
+
+	/**
+	 * Tests LdapAuth::get_email()
+	 *
+	 * @test
+	 */
+	public function test_get_email()
+	{
+		\Ldap::set_test_data(array(
+				'secure'=> false,
+				'users' => array(
+					'john' => array('email' => 'foo@example.net', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
+				),
+			));
+		\Config::set('ldapauth.secure', false);
+		\Config::set('ldapauth.guest_login', false);
+
+		// is instance load successful?
+		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+		$this->assertNotEquals(null, $auth);
+
+		$this->assertFalse($auth->get_email());
+
+		$this->assertFalse($auth->login('john', 'xxxx'));
+		$this->assertFalse($auth->get_email());
+
+		$this->assertTrue($auth->login('john', 'test'));
+		$this->assertEquals('foo@example.net', $auth->get_email());
+
+		$this->assertTrue($auth->logout());
+		$this->assertFalse($auth->get_email());
+
+		\Config::set('ldapauth.guest_login', true);
+
+		$this->assertFalse($auth->login('john', 'xxxx'));
+		$this->assertEquals('john@example.net', $auth->get_email());
 	}
 
 	/**

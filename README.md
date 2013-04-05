@@ -33,6 +33,14 @@ Fuel LDAP authentication パッケージ
 使い方
 ------
 
+注意点
+------
+
+* ユーザーの登録(``` Auth::instance()->create_user() ```)・更新(``` Auth::instance()->update_user() ```)・削除(``` Auth::instance()->delete_user() ```)処理は
+  LDAPサーバーに対して作用しません。
+  このパッケージで管理するデータベースを更新するのみです。
+* 関連して、パスワードの変更(``` Auth::instance()->change_password() ```)メソッドや
+  リセット(``` Auth::instance()->reset_password() ```)メソッドは常にFalseを返します。
 
 ライセンス
 ----------

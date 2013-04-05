@@ -36,7 +36,7 @@ abstract class Stateholder_Driver
 	//ハッシュ検証
 	// ユーザー名、ハッシュ
 	abstract function validate_hash($user, $hash);
-	
+
 	//ハッシュクリア
 	// ユーザー名、ハッシュ
 	abstract function clear_hash($user, $hash);

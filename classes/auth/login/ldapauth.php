@@ -46,11 +46,12 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 	 * @var  array  value for guest login
 	 */
 	protected static $guest_login = array(
-		'id'         => '',
-		'username'   => 'guest',
+		'id'         => 'guest',
 		'group'      => '0',
 		'login_hash' => false,
-		'email'      => false
+		'email'      => 'john@example.net',
+		'lastname'   => 'Doe',
+		'firstname'  => 'John',
 	);
 
 	/**
@@ -149,11 +150,13 @@ class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 
 		$this->ldap['user'] =
 			array(
-					'id' => $username,
-					'username'   => $firstname . ' ' . $lastname,
-					'group'      => '1',
-					'login_hash' => false,
-					'email'      => $email,
+					'id'             => $username,
+					'group'          => '1',
+					'login_hash'     => false,
+					'email'          => $email,
+					'lastname'       => $lastname,
+					'firstname'      => $firstname,
+					'profile_fields' => $firstname,
 				);
 
 		return $userdn;
@@ -328,7 +331,7 @@ logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($this->user,true));
 			return false;
 		}
 
-		\Session::set('username', $this->user['username']);
+		\Session::set('username', $this->user['id']);
 		\Session::set('login_hash', $this->create_login_hash());
 		return true;
 	}
@@ -512,16 +515,7 @@ return false;
 	 */
 	public function change_password($old_password, $new_password, $username = null)
 	{
-return false;
-		try
-		{
-			return (bool) $this->update_user(array('old_password' => $old_password, 'password' => $new_password), $username);
-		}
-		// Only catch the wrong password exception
-		catch (LdapUserWrongPassword $e)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -533,21 +527,7 @@ return false;
 	 */
 	public function reset_password($username)
 	{
-return false;
-		$new_password = \Str::random('alnum', 8);
-		$password_hash = $this->hash_password($new_password);
-
-		$affected_rows = \DB::update(\Config::get('ldapauth.table_name'))
-			->set(array('password' => $password_hash))
-			->where('username', '=', $username)
-			->execute(\Config::get('ldapauth.db_connection'));
-
-		if ( ! $affected_rows)
-		{
-			throw new LdapUserUpdateException('Failed to reset password, user was invalid.', 8);
-		}
-
-		return $new_password;
+		return '';
 	}
 
 	/**
@@ -652,7 +632,7 @@ return false;
 			return false;
 		}
 
-		return $this->user['username'];
+		return $this->user['firstname'] . ' ' . $this->user['lastname'];
 	}
 
 	/**
@@ -660,7 +640,7 @@ return false;
 	 *
 	 * @return  Array
 	 */
-	public function get_profile_fields()
+	public function get_profile_fields($field = null, $default = null)
 	{
 		if (empty($this->user))
 		{

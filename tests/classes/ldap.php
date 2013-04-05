@@ -95,6 +95,12 @@ class Ldap
 		{
 			$data[$key] = isset($data[$key]) ? $data[$key] : $val;
 		}
+
+		foreach($data['users'] as &$user)
+		{
+			$user = array_map(function($v){ return array($v); }, $user);
+		}
+
 		self::$data = $data;
 	}
 
@@ -154,7 +160,7 @@ class Ldap
 			$this->last_err = '';
 		}
 		else if (array_key_exists($username, self::$data['users']) &&
-		         $bind_password === self::$data['users'][$username]['password']) {
+		         $bind_password === self::$data['users'][$username]['password'][0]) {
 			$this->binded = true;
 			$this->last_err = '';
 		}

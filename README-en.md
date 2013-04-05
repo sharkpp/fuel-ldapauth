@@ -34,6 +34,15 @@ How to use
 ----------
 
 
+Notes
+-----
+
+* User registration(``` Auth::instance()->create_user() ```) and update(``` Auth::instance()->update_user() ```)
+  and delete(``` Auth::instance()->delete_user() ```) does not affect to the LDAP server.
+  It is only to update the database to be managed by this package.
+* In a related move, reset(``` Auth::instance()->reset_password() ```) and 
+  change the password(``` Auth::instance()->change_password() ```) will always return False.
+
 License
 -------
 
