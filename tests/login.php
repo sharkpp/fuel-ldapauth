@@ -257,29 +257,29 @@ class Tests_Login extends \TestCase
 	 *
 	 * @test
 	 */
-	public function test_create_user()
-	{
-		\Ldap::set_test_data(array(
-				'secure'=> false,
-				'users' => array(
-					'john' => array('email' => 'foo@example.net', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
-				),
-			));
-		\Config::set('ldapauth.secure', false);
-		\Config::set('ldapauth.guest_login', false);
-
-		// is instance load successful?
-		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
-		$this->assertNotEquals(null, $auth);
-
-		$this->assertTrue($auth->create_user('john', '', 'test@example.net', 100));
-
-		$this->assertTrue($auth->login('john', 'test'));
-		$this->assertEquals(array(array('LdapGroup', 100)), $auth->get_groups());
-
-		$this->setExpectedException('LdapUserUpdateException');
-		$this->assertFalse($auth->create_user('john', '', 'test@example.net', 100));
-	}
+//	public function test_create_user()
+//	{
+//		\Ldap::set_test_data(array(
+//				'secure'=> false,
+//				'users' => array(
+//					'john' => array('email' => 'foo@example.net', 'firstname' => 'John', 'lastname' => 'Smith', 'password' => 'test'),
+//				),
+//			));
+//		\Config::set('ldapauth.secure', false);
+//		\Config::set('ldapauth.guest_login', false);
+//
+//		// is instance load successful?
+//		$auth = \Auth::forge(array('driver' => 'LdapAuth', 'id' => uniqid('',true)));
+//		$this->assertNotEquals(null, $auth);
+//
+//		$this->assertTrue($auth->create_user('john', '', 'test@example.net', 100));
+//
+//		$this->assertTrue($auth->login('john', 'test'));
+//		$this->assertEquals(array(array('LdapGroup', 100)), $auth->get_groups());
+//
+//		$this->setExpectedException('LdapUserUpdateException');
+//		$this->assertFalse($auth->create_user('john', '', 'test@example.net', 100));
+//	}
 
 	/**
 	 * Tests LdapAuth::change_password()
