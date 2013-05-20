@@ -17,7 +17,7 @@ before_install:
   - git clone --recursive --quiet --branch=$BRANCHES git://github.com/fuel/fuel.git "$HOME/fuelphp"
 
 install:
-  - if [ $BRANCHES = "1.6/master" ]; then php composer.phar update; fi
+  - if [ $BRANCHES = "1.6/master" ]; then pushd "$HOME/fuelphp" ; wget http://getcomposer.org/composer.phar ; php composer.phar install; popd ; fi
 
 before_script:
   - ln -sf "`pwd`" "$HOME/fuelphp/fuel/packages/ldapauth"
