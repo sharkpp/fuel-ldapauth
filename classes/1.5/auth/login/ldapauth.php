@@ -18,7 +18,7 @@ namespace LdapAuth;
  * @package     Fuel
  * @subpackage  Auth
  */
-class Auth_Login_Ldapauth extends \Auth\Auth_Login_Driver
+class Auth_Login_LdapAuth extends \Auth\Auth_Login_Driver
 {
 
 	public static function _init()
@@ -45,7 +45,7 @@ class Auth_Login_Ldapauth extends \Auth\Auth_Login_Driver
 		'firstname'  => 'John',
 	);
 
-	protected static $group_class_name = 'Ldapgroup';
+	protected static $group_class_name = 'LdapGroup';
 
 	protected $impl = null;
 

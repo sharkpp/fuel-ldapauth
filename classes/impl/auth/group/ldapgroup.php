@@ -23,7 +23,7 @@
 namespace LdapAuth;
 
 
-class Auth_Group_Ldapgroup extends \Auth\Auth_Group_Simplegroup
+class Auth_Group_LdapGroup extends \Auth\Auth_Group_SimpleGroup
 {
 
 	public static $_valid_groups = array();
@@ -35,7 +35,7 @@ class Auth_Group_Ldapgroup extends \Auth\Auth_Group_Simplegroup
 	}
 
 	protected $config = array(
-		'drivers' => array('acl' => array('Ldapacl'))
+		'drivers' => array('acl' => array('LdapAcl'))
 	);
 }
 

@@ -23,7 +23,7 @@
 namespace LdapAuth;
 
 
-class Auth_Acl_LdapAcl extends \Auth\Auth_Acl_SimpleAcl
+class Auth_Acl_Ldapacl extends \Auth\Auth_Acl_Simpleacl
 {
 
 	protected static $_valid_roles = array();

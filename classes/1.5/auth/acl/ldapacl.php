@@ -23,20 +23,16 @@
 namespace LdapAuth;
 
 
-class Auth_Group_Ldapgroup extends \Auth\Auth_Group_Simplegroup
+class Auth_Acl_LdapAcl extends \Auth\Auth_Acl_SimpleAcl
 {
 
-	public static $_valid_groups = array();
+	protected static $_valid_roles = array();
 
 	public static function _init()
 	{
 		\Config::load('simpleauth', true, false, true);
-		static::$_valid_groups = array_keys(\Config::get('simpleauth.groups', array()));
+		static::$_valid_roles = array_keys(\Config::get('simpleauth.roles', array()));
 	}
-
-	protected $config = array(
-		'drivers' => array('acl' => array('Ldapacl'))
-	);
 }
 
-/* end of file ldapgroup.php */
+/* end of file ldapacl.php */
