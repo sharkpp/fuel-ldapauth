@@ -10,6 +10,7 @@ php:
   - 5.5
 
 env:
+  - BRANCHES=1.7/master
   - BRANCHES=1.6/master
   - BRANCHES=1.5/master
   - BRANCHES=1.4/master
