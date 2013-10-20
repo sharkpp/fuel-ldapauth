@@ -23,7 +23,7 @@ class Impl_Auth_Login_Ldapauth
 
 	public static function _init()
 	{
-		\Fuel::$env == \Fuel::TEST ?: \Autoloader::add_class('Ldap', __DIR__.'/../../ldap.php');
+		\Fuel::$env == \Fuel::TEST ?: \Autoloader::add_class('Ldap', __DIR__.'/../../../ldap.php');
 
 		\Config::load('ldapauth', true, true, true);
 
