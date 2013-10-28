@@ -67,7 +67,7 @@ class Stateholder_Db extends Stateholder_Driver
 	{
 		$last_login = \Date::forge()->get_timestamp();
 		$login_hash = sha1($this->login_hash_salt.$user.$last_login);
-//\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.'$last_login='.$last_login.',$login_hash='.$login_hash);
+//\Log::debug(__FILE__.'('.__LINE__.'):'.'$user='.$user.',$last_login='.$last_login.',$login_hash='.$login_hash);
 
 		$r = \DB::update($this->table_name)
 				->set(array(

@@ -128,23 +128,14 @@ class Impl_Auth_Login_Ldapauth
 		$userdn = $ent[0]['dn'];
 
 		logger(\Fuel::L_DEBUG, 'user dn = "'.$userdn.'"');
-		logger(\Fuel::L_DEBUG, __FILE__.'('.__LINE__.'):'.print_r($ent,true));
+		logger(\Fuel::L_DEBUG, 'entry = '.print_r($ent,true));
 
-		$email_field     = self::g('email');
-		$firstname_field = self::g('firstname');
-		$lastname_field  = self::g('lastname');
-		$firstname       = $firstname_field &&
-		                   isset($ent[0][$firstname_field][0]) ? $ent[0][$firstname_field][0]
-		                                                       : isset($ent[0][strtolower($firstname_field)][0]) ? $ent[0][strtolower($firstname_field)][0]
-		                                                                                                         : '';
-		$lastname        = $lastname_field &&
-		                   isset($ent[0][$lastname_field][0]) ? $ent[0][$lastname_field][0]
-		                                                      : isset($ent[0][strtolower($lastname_field)][0]) ? $ent[0][strtolower($lastname_field)][0]
-		                                                                                                       : '';
-		$email           = $email_field &&
-		                   isset($ent[0][$email_field][0]) ? $ent[0][$email_field][0]
-		                                                   : isset($ent[0][strtolower($email_field)][0]) ? $ent[0][strtolower($email_field)][0]
-		                                                                                                 : false;
+		$email_field     = self::g('email', '*');
+		$firstname_field = self::g('firstname', '*');
+		$lastname_field  = self::g('lastname', '*');
+		$firstname       = \Arr::get($ent, '0.'.$firstname_field.'.0', \Arr::get($ent, strtolower('0.'.$firstname_field.'.0'), ''));
+		$lastname        = \Arr::get($ent, '0.'.$lastname_field.'.0',  \Arr::get($ent, strtolower('0.'.$lastname_field.'.0'),  ''));
+		$email           = \Arr::get($ent, '0.'.$email_field.'.0',     \Arr::get($ent, strtolower('0.'.$email_field.'.0'),     false));
 
 		$this->ldap['user'] =
 			array(
@@ -156,6 +147,7 @@ class Impl_Auth_Login_Ldapauth
 					'firstname'      => $firstname,
 					'profile_fields' => $firstname,
 				);
+		logger(\Fuel::L_DEBUG, 'user = '.print_r($this->ldap['user'],true).'');
 
 		return $userdn;
 	}
@@ -217,10 +209,11 @@ class Impl_Auth_Login_Ldapauth
 	 */
 	public function perform_check()
 	{
+//logger(\Fuel::L_DEBUG, __METHOD__.'() '.print_r(debug_backtrace(0),true));
 		$username    = \Session::get('username');
 		$login_hash  = \Session::get('login_hash');
 
-		logger(\Fuel::L_DEBUG, 'username="'.$username.'" login_hash="'.$login_hash.'"');
+		logger(\Fuel::L_DEBUG, __METHOD__.'() username="'.$username.'" login_hash="'.$login_hash.'"');
 
 		// only worth checking if there's both a username and login-hash
 		if ( ! empty($username) and ! empty($login_hash))
@@ -257,6 +250,8 @@ class Impl_Auth_Login_Ldapauth
 		$username_or_email = trim($username_or_email) ?: trim(\Input::post(self::g('username_post_key', 'username')));
 		$password = trim($password) ?: trim(\Input::post(self::g('password_post_key', 'password')));
 
+		logger(\Fuel::L_DEBUG, __METHOD__.'() username_or_email="'.$username_or_email.'" password="'.substr($password,0,1).str_pad('', strlen($password)-1, '*').'"');
+
 		$this->user = null;
 
 		if (empty($username_or_email) or empty($password))
@@ -292,16 +287,18 @@ class Impl_Auth_Login_Ldapauth
 	{
 		if ( false === $this->validate_user($username_or_email, $password) )
 		{
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
 			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
 			\Session::delete('username');
 			\Session::delete('login_hash');
 			return false;
 		}
 
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
 		\Session::set('username', $this->user['id']);
 		\Session::set('login_hash', $this->create_login_hash());
 		\Session::instance()->rotate();
-
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.''.($this->perform_check()?'t':'f'));
 		return true;
 	}
 
@@ -322,12 +319,14 @@ class Impl_Auth_Login_Ldapauth
 
 		if ( false === $this->user )
 		{
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
 			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
 			\Session::delete('username');
 			\Session::delete('login_hash');
 			return false;
 		}
 
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
 		\Session::set('username', $this->user['id']);
 		\Session::set('login_hash', $this->create_login_hash());
 		return true;
