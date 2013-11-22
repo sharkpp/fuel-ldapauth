@@ -665,7 +665,7 @@ return false;
 			$groups = $this->get_groups();
 			$user = reset($groups);
 		}
-		return parent::has_access($condition, $driver, $user);
+		return call_user_func(array($this->owner, '\\Auth_Login_Driver::has_access'), $condition, $driver, $user);
 	}
 
 	/**

@@ -23,14 +23,6 @@ class Auth_Login_Ldapauth extends \Auth\Auth_Login_Driver
 
 	public static function _init()
 	{
-		\Fuel::$env == \Fuel::TEST ?: \Autoloader::add_class('Ldap', __DIR__.'/../../ldap.php');
-
-		\Config::load('ldapauth', true, true, true);
-
-		//
-		$driver_name = self::g('driver', 'Db');
-		$class = 'Stateholder_'.ucfirst(\Inflector::denamespace($driver_name));
-		self::$driver = new $class();
 	}
 
 	/**
