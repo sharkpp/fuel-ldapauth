@@ -209,11 +209,11 @@ class Impl_Auth_Login_Ldapauth
 	 */
 	public function perform_check()
 	{
-//logger(\Fuel::L_DEBUG, __METHOD__.'() '.print_r(debug_backtrace(0),true));
-		$username    = \Session::get('username');
-		$login_hash  = \Session::get('login_hash');
+//$bt=debug_backtrace(0);array_walk($bt, function(&$item, $key){$item=sprintf('%s(%d)',\Arr::get($item,'file',''),\Arr::get($item,'line',''));});logger(\Fuel::L_DEBUG, __METHOD__.'() '.print_r($bt,true));
+		$username    = \Session::get('ldapauth.username');
+		$login_hash  = \Session::get('ldapauth.login_hash');
 
-		logger(\Fuel::L_DEBUG, __METHOD__.'() username="'.$username.'" login_hash="'.$login_hash.'"');
+		logger(\Fuel::L_DEBUG, 'L'.__LINE__.' '.__METHOD__.'() username="'.\Session::get('ldapauth.username').'" login_hash="'.\Session::get('ldapauth.login_hash').'"');
 
 		// only worth checking if there's both a username and login-hash
 		if ( ! empty($username) and ! empty($login_hash))
@@ -234,8 +234,8 @@ class Impl_Auth_Login_Ldapauth
 
 		// no valid login when still here, ensure empty session and optionally set guest_login
 		$this->user = self::g('guest_login', true) ? static::$guest_login : false;
-		\Session::delete('username');
-		\Session::delete('login_hash');
+		\Session::delete('ldapauth.username');
+		\Session::delete('ldapauth.login_hash');
 
 		return false;
 	}
@@ -287,18 +287,17 @@ class Impl_Auth_Login_Ldapauth
 	{
 		if ( false === $this->validate_user($username_or_email, $password) )
 		{
-logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.' '.__METHOD__.'()');
 			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
-			\Session::delete('username');
-			\Session::delete('login_hash');
+			\Session::delete('ldapauth.username');
+			\Session::delete('ldapauth.login_hash');
 			return false;
 		}
 
-logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
-		\Session::set('username', $this->user['id']);
-		\Session::set('login_hash', $this->create_login_hash());
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.' '.__METHOD__.'()');
+		\Session::set('ldapauth.username', $this->user['id']);
+		\Session::set('ldapauth.login_hash', $this->create_login_hash());
 		\Session::instance()->rotate();
-logger(\Fuel::L_DEBUG, 'L'.__LINE__.''.($this->perform_check()?'t':'f'));
 		return true;
 	}
 
@@ -319,16 +318,16 @@ logger(\Fuel::L_DEBUG, 'L'.__LINE__.''.($this->perform_check()?'t':'f'));
 
 		if ( false === $this->user )
 		{
-logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.' '.__METHOD__.'()');
 			$this->user = self::g('guest_login', true) ? static::$guest_login : false;
-			\Session::delete('username');
-			\Session::delete('login_hash');
+			\Session::delete('ldapauth.username');
+			\Session::delete('ldapauth.login_hash');
 			return false;
 		}
 
-logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
-		\Session::set('username', $this->user['id']);
-		\Session::set('login_hash', $this->create_login_hash());
+logger(\Fuel::L_DEBUG, 'L'.__LINE__.' '.__METHOD__.'()');
+		\Session::set('ldapauth.username', $this->user['id']);
+		\Session::set('ldapauth.login_hash', $this->create_login_hash());
 		return true;
 	}
 
@@ -343,8 +342,8 @@ logger(\Fuel::L_DEBUG, 'L'.__LINE__.'');
 			self::$driver->clear_hash($this->user['id'], $this->user['login_hash']);
 		}
 		$this->user = self::g('guest_login', true) ? static::$guest_login : false;
-		\Session::delete('username');
-		\Session::delete('login_hash');
+		\Session::delete('ldapauth.username');
+		\Session::delete('ldapauth.login_hash');
 		return true;
 	}
 
