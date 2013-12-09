@@ -85,32 +85,32 @@ class Tests_Login extends \TestCase
 		// is login failed?
 		$this->assertFalse($auth->validate_user('john', 'aaaa'));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login failed?
 		$this->assertFalse($auth->validate_user('john', ''));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login failed?
 		$this->assertFalse($auth->validate_user('smith', 'test'));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login successful?
 		$this->assertNotEquals(false, $auth->validate_user('john', 'test'));
 		$this->assertNotEquals(false, $auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login failed?
 		$this->assertFalse($auth->validate_user('john', ''));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 	}
 
 	/**
@@ -139,40 +139,40 @@ class Tests_Login extends \TestCase
 		// is login failed?
 		$this->assertFalse($auth->login('john', 'aaaa'));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login failed?
 		$this->assertFalse($auth->login('john', ''));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login failed?
 		$this->assertFalse($auth->login('smith', 'test'));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login successful?
 		$this->assertTrue($auth->login('john', 'test'));
 		$this->assertNotEquals(false, $auth->get_user_id());
-		$this->assertNotEquals(null, \Session::get('username'));
-		$this->assertNotEquals(null, \Session::get('login_hash'));
+		$this->assertNotEquals(null, \Session::get('ldapauth.username'));
+		$this->assertNotEquals(null, \Session::get('ldapauth.login_hash'));
 
 		// is login failed?
 		$this->assertFalse($auth->login('john', ''));
 		$this->assertFalse($auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 
 		\Config::set('ldapauth.guest_login', true);
 
 		// is login failed?
 		$this->assertFalse($auth->login('john', 'aaaa'));
 		$this->assertNotEquals(false, $auth->get_user_id());
-		$this->assertEquals(null, \Session::get('username'));
-		$this->assertEquals(null, \Session::get('login_hash'));
+		$this->assertEquals(null, \Session::get('ldapauth.username'));
+		$this->assertEquals(null, \Session::get('ldapauth.login_hash'));
 	}
 
 	/**
